@@ -234,6 +234,7 @@ export default function Bus3DMap({
       zoom: 12,
       pitch: 45,
       bearing: -15,
+      // @ts-ignore TS2353: 'antialias' might not be explicitly defined in types but it works
       antialias: true,
       attributionControl: false,
     });
