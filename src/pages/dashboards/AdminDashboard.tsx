@@ -14,7 +14,8 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '../../stores/appStore';
 import { useSocket } from '../../hooks/useSocket';
-import { MapComponent } from '../../components/dashboard';
+import Bus3DMap from '../../components/Bus3DMap';
+import { notify } from '../../components/NotificationProvider';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -68,6 +69,7 @@ export default function AdminDashboard() {
     if (response.ok) {
       setBusName('');
       showToast('New bus added to fleet and broadcast in real time.', 'success');
+      notify('New Bus Added Successfully', 'success');
       return;
     }
 
@@ -113,7 +115,7 @@ export default function AdminDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <MapComponent buses={buses} showUserMarker={false} heightClassName="h-72 mb-4" />
+              <Bus3DMap buses={buses} showUserMarker={false} heightClassName="h-72 mb-4" showLegend={false} />
               <div className="space-y-2">
                 {buses.map((bus) => (
                   <div key={bus.id} className="flex items-center justify-between p-3 rounded-lg bg-surface/50 hover:bg-surface transition-colors">

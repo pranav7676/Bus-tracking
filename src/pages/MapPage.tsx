@@ -1,5 +1,5 @@
 import { useAppStore } from '../stores/appStore';
-import { MapComponent } from '../components/dashboard';
+import Bus3DMap from '../components/Bus3DMap';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { MapPin } from 'lucide-react';
@@ -20,7 +20,7 @@ export function MapPage() {
                     </div>
                 </CardHeader>
                 <CardContent className="p-4 pt-0">
-                        <MapComponent buses={buses} showUserMarker={false} heightClassName="h-[calc(100vh-250px)]" />
+                    <Bus3DMap buses={buses} showUserMarker={false} heightClassName="h-[calc(100vh-250px)]" />
                 </CardContent>
             </Card>
         </div>

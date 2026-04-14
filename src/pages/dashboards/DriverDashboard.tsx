@@ -14,7 +14,8 @@ import { useAppStore } from '../../stores/appStore';
 import { useSocket } from '../../hooks/useSocket';
 import { useGeolocation } from '../../hooks/useGeolocation';
 import { useToast } from '../../context/ToastContext';
-import { MapComponent } from '../../components/dashboard';
+import Bus3DMap from '../../components/Bus3DMap';
+import { notify } from '../../components/NotificationProvider';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -54,6 +55,25 @@ export default function DriverDashboard() {
       socket.off('attendanceNotification', onAttendanceNotification);
     };
   }, [socket, showToast]);
+
+  /* ── Listen for bus-added / driver-added notifications ── */
+  useEffect(() => {
+    const onBusAdded = (data: { name?: string; number?: string }) => {
+      notify(`New Bus Added: ${data.name || data.number || 'Unknown'}`, 'success');
+    };
+    const onDriverAdded = (data: { name?: string }) => {
+      notify(`Driver Assigned: ${data.name || 'Unknown'}`, 'info');
+    };
+
+    socket.on('bus-added', onBusAdded);
+    socket.on('newBusAdded', onBusAdded);
+    socket.on('driver-added', onDriverAdded);
+    return () => {
+      socket.off('bus-added', onBusAdded);
+      socket.off('newBusAdded', onBusAdded);
+      socket.off('driver-added', onDriverAdded);
+    };
+  }, [socket]);
 
   const handleStartTrip = useCallback(() => {
     startTrip();
@@ -204,11 +224,12 @@ export default function DriverDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <MapComponent
+              <Bus3DMap
                 buses={assignedBus ? [assignedBus] : []}
                 userLocation={geo.latitude && geo.longitude ? { lat: geo.latitude, lng: geo.longitude } : null}
                 showUserMarker
                 heightClassName="h-64"
+                showLegend={false}
               />
               {geo.accuracy && (
                 <p className="mt-2 text-xs text-muted-foreground">GPS accuracy: ±{Math.round(geo.accuracy)}m</p>

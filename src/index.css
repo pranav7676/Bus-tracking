@@ -721,3 +721,37 @@ html {
 .cl-internal-b3fm6y {
   color: hsl(var(--muted-foreground)) !important;
 }
+
+/* ============================================
+   MAPLIBRE GL OVERRIDES
+   ============================================ */
+
+/* Rounded corners on map canvas */
+.maplibregl-canvas {
+  border-radius: 1rem;
+}
+
+/* Hide default MapLibre controls styling for dark theme */
+.maplibregl-ctrl-group {
+  display: none !important;
+}
+
+/* Attribution styling */
+.maplibregl-ctrl-attrib {
+  background: transparent !important;
+  font-size: 10px !important;
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.maplibregl-ctrl-attrib a {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Glassmorphism panel utility */
+.glass-panel {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+}

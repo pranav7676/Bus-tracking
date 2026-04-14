@@ -6,6 +6,7 @@ import { AuthGuard } from './components/auth';
 import { CustomCursor } from './components/ui/CustomCursor';
 import { ScrollProgress } from './components/ui/ScrollProgress';
 import { BackToTop } from './components/ui/BackToTop';
+import NotificationProvider from './components/NotificationProvider';
 import { CommandPalette } from './components/ui/CommandPalette';
 import { MobileBottomNav } from './components/ui/MobileBottomNav';
 import {
@@ -72,6 +73,7 @@ function App() {
 
   return (
     <ErrorBoundary>
+      <NotificationProvider />
       <BrowserRouter>
         <CustomCursor />
         <ScrollProgress />

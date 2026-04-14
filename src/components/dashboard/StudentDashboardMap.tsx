@@ -10,7 +10,9 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAppStore } from '../../stores/appStore';
-import MapComponent from './MapComponent';
+import { useSocket } from '../../hooks/useSocket';
+import { notify } from '../NotificationProvider';
+import Bus3DMap from '../Bus3DMap';
 
 interface UserLocation {
   lat: number;
@@ -55,6 +57,7 @@ export function StudentDashboardMap({
   const [sosMessage, setSosMessage] = useState<string>('No active alerts. Stay safe!');
   const [sendingSos, setSendingSos] = useState(false);
   const [markingAttendance, setMarkingAttendance] = useState(false);
+  const { socket } = useSocket();
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -75,6 +78,27 @@ export function StudentDashboardMap({
       navigator.geolocation.clearWatch(watchId);
     };
   }, []);
+
+  /* ── Socket listeners for real-time notifications ── */
+  useEffect(() => {
+    const onBusAdded = (data: { name?: string; number?: string }) => {
+      notify(`New Bus Added: ${data.name || data.number || 'Unknown'}`, 'success');
+    };
+
+    const onDriverAdded = (data: { name?: string }) => {
+      notify(`Driver Assigned: ${data.name || 'Unknown'}`, 'info');
+    };
+
+    socket.on('bus-added', onBusAdded);
+    socket.on('newBusAdded', onBusAdded);
+    socket.on('driver-added', onDriverAdded);
+
+    return () => {
+      socket.off('bus-added', onBusAdded);
+      socket.off('newBusAdded', onBusAdded);
+      socket.off('driver-added', onDriverAdded);
+    };
+  }, [socket]);
 
   const speed = useMemo(() => {
     return bus?.location?.speed ?? null;
@@ -116,6 +140,7 @@ export function StudentDashboardMap({
       }
 
       setSosMessage('SOS alert sent successfully. Authorities have been notified.');
+      notify('SOS alert sent! Help is on the way.', 'warning');
       window.setTimeout(() => {
         setSosMessage('No active alerts. Stay safe!');
       }, 3500);
@@ -151,6 +176,7 @@ export function StudentDashboardMap({
       }
 
       setSosMessage('Attendance marked successfully. Driver has been notified.');
+      notify('Attendance marked successfully!', 'success');
       window.setTimeout(() => setSosMessage('No active alerts. Stay safe!'), 3500);
     } catch {
       setSosMessage('Failed to mark attendance. Please try again.');
@@ -162,7 +188,7 @@ export function StudentDashboardMap({
 
   return (
     <div className="grid h-full w-full gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-      <MapComponent buses={buses} userLocation={userLocation} showUserMarker heightClassName="h-[520px]" />
+      <Bus3DMap buses={buses} userLocation={userLocation} showUserMarker heightClassName="h-[520px]" />
 
       <aside className="flex min-h-[520px] flex-col rounded-2xl border border-border bg-card p-5 shadow-card">
         <div>
