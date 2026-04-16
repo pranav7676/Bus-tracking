@@ -22,49 +22,68 @@ async function apiRequest(endpoint: string, options: RequestInit = {}) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_BASE}${endpoint}`, {
-    ...options,
-    headers,
-    credentials: 'include',
-  });
+  try {
+    console.log(`🔵 API Request: ${options.method || 'GET'} ${API_BASE}${endpoint}`);
+    
+    const res = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
+      headers,
+      credentials: 'include',
+    });
 
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.message || 'Request failed');
+    console.log(`📨 Response Status: ${res.status}`);
+    
+    const data = await res.json();
+    
+    if (!res.ok) {
+      console.error(`❌ API Error: ${data.message || 'Request failed'}`);
+      throw new Error(data.message || 'Request failed');
+    }
+    
+    console.log(`✅ API Success: ${JSON.stringify(data).substring(0, 100)}...`);
+    return data;
+  } catch (error: any) {
+    if (error instanceof TypeError) {
+      console.error(`🚫 Network Error (Failed to fetch): ${error.message}`);
+      console.error(`⚠️  Make sure backend is running on http://localhost:5000`);
+      throw new Error(`Network error: Backend may not be running. Check console.`);
+    }
+    throw error;
   }
-  return data;
 }
 
 export const api = {
   // Auth
-  register: (data: { name: string; email: string; password: string; phone?: string; countryCode?: string }) =>
-    apiRequest('/register', { method: 'POST', body: JSON.stringify(data) }),
+  register: (data: { username: string; email: string; password: string }) =>
+    apiRequest('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
 
   login: (data: { email: string; password: string }) =>
-    apiRequest('/login', { method: 'POST', body: JSON.stringify(data) }),
+    apiRequest('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
+    
+  getMe: () => apiRequest('/auth/me'),
+  updateRole: (role: string) => apiRequest('/auth/me/role', { method: 'PATCH', body: JSON.stringify({ role }) }),
 
+  // Profile
   getProfile: () => apiRequest('/profile'),
 
-  updateProfile: (data: { name?: string; phone?: string; countryCode?: string; role?: string; onboardingDone?: boolean }) =>
+  createProfile: (data: any) =>
+    apiRequest('/profile', { method: 'POST', body: JSON.stringify(data) }),
+
+  updateProfile: (data: any) =>
     apiRequest('/profile', { method: 'PUT', body: JSON.stringify(data) }),
 
-  changePassword: (data: { currentPassword: string; newPassword: string }) =>
-    apiRequest('/change-password', { method: 'PUT', body: JSON.stringify(data) }),
+  // Bus
+  getBuses: () => apiRequest('/bus'),
+  
+  createBus: (data: any) =>
+    apiRequest('/bus', { method: 'POST', body: JSON.stringify(data) }),
 
-  deleteAccount: () => apiRequest('/account', { method: 'DELETE' }),
+  // Attendance
+  getAttendance: () => apiRequest('/attendance'),
+  
+  markAttendance: (data: { busId: string, status?: string }) =>
+    apiRequest('/attendance', { method: 'POST', body: JSON.stringify(data) }),
 
-  // Cart / Payment
-  createOrder: (data: { plan: string; price: number }) =>
-    apiRequest('/cart', { method: 'POST', body: JSON.stringify(data) }),
-
-  checkout: (orderId: string, plan: string) =>
-    apiRequest(`/checkout/${orderId}`, { method: 'POST', body: JSON.stringify({ plan }) }),
-
-  getOrders: () => apiRequest('/orders'),
-
-  // QR
-  generateQR: (data: any) =>
-    apiRequest('/generate-qr', { method: 'POST', body: JSON.stringify({ data }) }),
 };
 
 export { getToken, setToken, removeToken };

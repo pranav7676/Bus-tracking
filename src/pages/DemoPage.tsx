@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Play, Monitor, Smartphone, Globe, Zap, MapPin, Users, Shield, BarChart3 } from 'lucide-react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Breadcrumb } from '../components/ui/Breadcrumb';
@@ -36,7 +36,8 @@ const demoFeatures = [
 
 export function DemoPage() {
     const navigate = useNavigate();
-    const { isSignedIn } = useAuth();
+    const { user } = useAuth();
+    const isSignedIn = !!user;
 
     return (
         <div className="min-h-screen bg-background">

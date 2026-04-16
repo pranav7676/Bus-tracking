@@ -1,5 +1,5 @@
 import { Moon, Sun, Bell, Wifi, WifiOff, LogOut, User, ChevronDown, Settings, CreditCard, LayoutDashboard, HelpCircle, BellRing } from 'lucide-react';
-import { useClerk, useUser } from '@clerk/clerk-react';
+import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -30,8 +30,7 @@ const menuItems = [
 ];
 
 export function Navbar({ title = 'Dashboard' }: NavbarProps) {
-    const { signOut } = useClerk();
-    const { user } = useUser();
+    const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -102,7 +101,7 @@ export function Navbar({ title = 'Dashboard' }: NavbarProps) {
     const handleLogout = async () => {
         setIsLoggingOut(true);
         try {
-            await signOut();
+            logout();
             navigate('/');
         } catch (error) {
             console.error('Logout failed:', error);
@@ -178,8 +177,8 @@ export function Navbar({ title = 'Dashboard' }: NavbarProps) {
                                 }}
                             >
                                 <Avatar className="h-8 w-8">
-                                    <AvatarImage src={user?.imageUrl} alt={user?.fullName || 'User'} />
-                                    <AvatarFallback className="text-xs">{getInitials(user?.fullName)}</AvatarFallback>
+                                    <AvatarImage src={undefined} alt={user?.username || 'User'} />
+                                    <AvatarFallback className="text-xs">{getInitials(user?.username)}</AvatarFallback>
                                 </Avatar>
                                 <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
                             </button>
@@ -196,8 +195,8 @@ export function Navbar({ title = 'Dashboard' }: NavbarProps) {
                                     >
                                         {/* User Info Header */}
                                         <div className="px-4 py-3 border-b border-border bg-surface/50">
-                                            <p className="font-medium text-sm">{user?.fullName || 'User'}</p>
-                                            <p className="text-xs text-muted-foreground mt-0.5">{user?.primaryEmailAddress?.emailAddress}</p>
+                                            <p className="font-medium text-sm">{user?.username || 'User'}</p>
+                                            <p className="text-xs text-muted-foreground mt-0.5">{user?.email}</p>
                                             <p className="text-xs text-primary mt-1 capitalize">{userRole?.toLowerCase() || 'Passenger'}</p>
                                         </div>
 

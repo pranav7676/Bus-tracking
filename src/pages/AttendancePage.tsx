@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ClipboardCheck, Calendar, User } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
@@ -5,17 +6,35 @@ import { Badge } from '../components/ui/Badge';
 import { StatCard } from '../components/ui/StatCard';
 import { QRScanner } from '../components/dashboard/QRScanner';
 import { useLanguage } from '../context/LanguageContext';
-
-const attendanceRecords = [
-    { id: '1', user: 'Alex Johnson', bus: 'BUS-001', route: 'Downtown Express', time: '08:02 AM', date: 'Today' },
-    { id: '2', user: 'Sarah Chen', bus: 'BUS-001', route: 'Downtown Express', time: '08:03 AM', date: 'Today' },
-    { id: '3', user: 'Mike Williams', bus: 'BUS-002', route: 'Campus Shuttle', time: '08:14 AM', date: 'Today' },
-    { id: '4', user: 'Emily Davis', bus: 'BUS-001', route: 'Downtown Express', time: '08:26 AM', date: 'Today' },
-    { id: '5', user: 'James Wilson', bus: 'BUS-003', route: 'Airport Link', time: '08:30 AM', date: 'Today' },
-];
+import { api } from '../lib/api';
 
 export function AttendancePage() {
     const { t } = useLanguage();
+    const [records, setRecords] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchAttendance = async () => {
+            try {
+                const data = await api.getAttendance();
+                setRecords(data);
+            } catch (err) {
+                console.error('Failed to load attendance', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchAttendance();
+        
+        // Polling for demo updates
+        const timer = setInterval(fetchAttendance, 10000);
+        return () => clearInterval(timer);
+    }, []);
+
+    // Calculate unique users
+    const uniqueUsers = new Set(records.map(r => r.userId?._id)).size;
+    const todayCheckins = records.length; // Simply count all fetched depending on filter logic returned by backend
 
     return (
         <div className="space-y-6">
@@ -27,7 +46,7 @@ export function AttendancePage() {
             >
                 <StatCard
                     title={t('attendance.todayCheckins')}
-                    value={847}
+                    value={todayCheckins}
                     change="+12%"
                     changeType="positive"
                     icon={<ClipboardCheck className="h-5 w-5 text-primary" />}
@@ -39,7 +58,7 @@ export function AttendancePage() {
                 />
                 <StatCard
                     title={t('attendance.uniquePassengers')}
-                    value={312}
+                    value={uniqueUsers}
                     icon={<User className="h-5 w-5 text-purple-500" />}
                 />
             </motion.div>
@@ -75,24 +94,34 @@ export function AttendancePage() {
                                     <thead>
                                         <tr className="border-b border-border">
                                             <th className="table-header py-3 px-4">{t('attendance.passenger')}</th>
+                                            <th className="table-header py-3 px-4">Register No.</th>
                                             <th className="table-header py-3 px-4">{t('attendance.bus')}</th>
-                                            <th className="table-header py-3 px-4">{t('attendance.route')}</th>
+                                            <th className="table-header py-3 px-4">Route Name</th>
                                             <th className="table-header py-3 px-4">{t('attendance.time')}</th>
                                             <th className="table-header py-3 px-4">{t('attendance.status')}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {attendanceRecords.map((record) => (
-                                            <tr key={record.id} className="border-b border-border last:border-0">
-                                                <td className="table-cell font-medium">{record.user}</td>
-                                                <td className="table-cell text-muted-foreground">{record.bus}</td>
-                                                <td className="table-cell text-muted-foreground">{record.route}</td>
-                                                <td className="table-cell text-muted-foreground">{record.time}</td>
-                                                <td className="table-cell">
-                                                    <Badge variant="success">{t('attendance.verified')}</Badge>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                        {loading ? (
+                                            <tr><td colSpan={6} className="text-center py-4">Loading...</td></tr>
+                                        ) : records.length === 0 ? (
+                                            <tr><td colSpan={6} className="text-center py-4">No records found</td></tr>
+                                        ) : (
+                                            records.map((record) => (
+                                                <tr key={record._id} className="border-b border-border last:border-0">
+                                                    <td className="table-cell font-medium">{record.profile?.fullName || record.userId?.username || 'Unknown'}</td>
+                                                    <td className="table-cell text-muted-foreground">{record.profile?.registerNumber || '-'}</td>
+                                                    <td className="table-cell text-muted-foreground">{record.busId?.busNumber || '-'}</td>
+                                                    <td className="table-cell text-muted-foreground">{record.busId?.routeName || '-'}</td>
+                                                    <td className="table-cell text-muted-foreground">
+                                                        {new Date(record.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </td>
+                                                    <td className="table-cell">
+                                                        <Badge variant="success">{record.status}</Badge>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
                                     </tbody>
                                 </table>
                             </div>

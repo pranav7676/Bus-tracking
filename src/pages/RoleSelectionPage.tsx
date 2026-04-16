@@ -1,9 +1,10 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
 import { GraduationCap, Truck, Shield, ArrowRight } from 'lucide-react';
 import { useAppStore } from '../stores/appStore';
+import { api } from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 import type { UserRole } from '../types';
 
 const roles = [
@@ -38,7 +39,7 @@ const roles = [
 
 export default function RoleSelectionPage() {
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { user, updateUser } = useAuth();
   const setUserRole = useAppStore((state) => state.setUserRole);
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,21 +48,18 @@ export default function RoleSelectionPage() {
     if (!selectedRole || !user) return;
     setIsSubmitting(true);
     try {
-      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/users/${user.id}/role`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: selectedRole }),
-      }).catch(() => {});
-
+      await api.updateRole(selectedRole);
+      updateUser({ role: selectedRole });
       setUserRole(selectedRole);
       navigate('/onboarding');
     } catch {
       setUserRole(selectedRole);
+      updateUser({ role: selectedRole });
       navigate('/onboarding');
     } finally {
       setIsSubmitting(false);
     }
-  }, [selectedRole, user, setUserRole, navigate]);
+  }, [selectedRole, user, setUserRole, updateUser, navigate]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-6 py-12">

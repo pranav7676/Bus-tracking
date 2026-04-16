@@ -2,25 +2,18 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
-import { ClerkProvider } from '@clerk/clerk-react'
+import { AuthProvider } from './context/AuthContext'
 import { ToastProvider } from './context/ToastContext'
 import { LanguageProvider } from './context/LanguageContext'
 import { ThemeProvider } from './context/ThemeContext'
+import { testBackendConnection } from './lib/testConnection'
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
-
-if (!PUBLISHABLE_KEY) {
-  throw new Error("Missing Clerk Publishable Key")
-}
+// Expose test function for browser console
+(window as any).testBackendConnection = testBackendConnection;
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ClerkProvider
-      publishableKey={PUBLISHABLE_KEY}
-      signInUrl="/sign-in"
-      signUpUrl="/sign-up"
-      afterSignOutUrl="/"
-    >
+    <AuthProvider>
       <ThemeProvider>
         <LanguageProvider>
           <ToastProvider>
@@ -28,6 +21,6 @@ createRoot(document.getElementById('root')!).render(
           </ToastProvider>
         </LanguageProvider>
       </ThemeProvider>
-    </ClerkProvider>
+    </AuthProvider>
   </StrictMode>,
 )

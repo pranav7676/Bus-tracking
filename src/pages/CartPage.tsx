@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, ShoppingCart, Check, CreditCard, FileText, Minus, Plus, Trash2, Lock } from 'lucide-react';
-import { useAuth, useUser } from '@clerk/clerk-react';
+import { useAuth } from '../context/AuthContext';
 import { QRCodeCanvas } from 'qrcode.react';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
@@ -26,8 +26,7 @@ const planDetails: Record<string, { name: string; price: number; features: strin
 export function CartPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { isSignedIn } = useAuth();
-  const { user } = useUser();
+  const { user, isSignedIn, isLoaded } = useAuth();
   const [quantity, setQuantity] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderComplete, setOrderComplete] = useState(false);
@@ -55,10 +54,10 @@ export function CartPage() {
   }, []);
 
   useEffect(() => {
-    if (!isSignedIn) {
+    if (isLoaded && !isSignedIn) {
       navigate('/sign-up?redirect_url=/cart?plan=' + selectedPlan);
     }
-  }, [isSignedIn, navigate, selectedPlan]);
+  }, [isLoaded, isSignedIn, navigate, selectedPlan]);
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
@@ -92,8 +91,8 @@ export function CartPage() {
     setTimeout(() => {
       // Save order to localStorage for ConfirmationPage
       const order = {
-        clerkUserId: user?.id || 'guest',
-        email: user?.primaryEmailAddress?.emailAddress || '',
+        userId: user?.id || 'guest',
+        email: user?.email || '',
         plan: selectedPlan,
         planName: plan.name,
         quantity,
@@ -113,8 +112,8 @@ export function CartPage() {
   };
 
   const qrData = JSON.stringify({
-    clerkUserId: user?.id || 'guest',
-    email: user?.primaryEmailAddress?.emailAddress || '',
+    userId: user?.id || 'guest',
+    email: user?.email || '',
     plan: selectedPlan,
     quantity,
     total,
@@ -308,8 +307,14 @@ export function CartPage() {
                           </div>
                         </div>
                         <div className="border-t border-border pt-3 space-y-2">
-                          <div className="flex justify-between"><span>Bill To:</span><span>{user?.fullName || 'User'}</span></div>
-                          <div className="flex justify-between"><span>Email:</span><span>{user?.primaryEmailAddress?.emailAddress || ''}</span></div>
+                          <div className="flex justify-between">
+                          <span>Bill To:</span>
+                          <span>{user?.username || 'User'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Email:</span>
+                          <span>{user?.email || ''}</span>
+                        </div>
                         </div>
                         <div className="border-t border-border mt-3 pt-3 space-y-2">
                           <div className="flex justify-between"><span>{plan.name} × {quantity}</span><span>₹{subtotal.toLocaleString('en-IN')}</span></div>

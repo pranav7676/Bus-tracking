@@ -1,4 +1,4 @@
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '../../context/AuthContext';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAppStore } from '../../stores/appStore';
 import type { UserRole } from '../../types';
@@ -9,7 +9,8 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-    const { isSignedIn, isLoaded } = useAuth();
+    const { user, isLoaded } = useAuth();
+    const isSignedIn = !!user;
     const location = useLocation();
     const userRole = useAppStore((state) => state.userRole);
 

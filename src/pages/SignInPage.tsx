@@ -1,9 +1,29 @@
-import { SignIn } from '@clerk/clerk-react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 
 export default function SignInPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      await login(email, password);
+      navigate('/select-role');
+    } catch (err: any) {
+      setError(err.message || 'Failed to sign in');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -41,24 +61,41 @@ export default function SignInPage() {
               smart<span className="text-primary">bus</span>
             </span>
           </div>
-          <SignIn
-            routing="path"
-            path="/sign-in"
-            signUpUrl="/sign-up"
-            fallbackRedirectUrl="/dashboard/student"
-            appearance={{
-              elements: {
-                rootBox: 'w-full',
-                card: 'bg-card border border-border shadow-none w-full',
-                headerTitle: 'text-foreground',
-                headerSubtitle: 'text-muted-foreground',
-                formFieldLabel: 'text-foreground',
-                formFieldInput: 'bg-surface border-border text-foreground',
-                formButtonPrimary: 'bg-primary hover:opacity-90',
-                footerActionLink: 'text-primary',
-              },
-            }}
-          />
+          
+          <div className="bg-card border border-border shadow-none w-full p-8 rounded-xl">
+            <h2 className="text-2xl font-semibold mb-6">Sign In</h2>
+            {error && <div className="text-red-500 mb-4">{error}</div>}
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="w-full bg-surface border border-border rounded-md px-3 py-2 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full bg-surface border border-border rounded-md px-3 py-2 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-primary text-primary-foreground py-2 rounded-md hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {loading ? 'Signing In...' : 'Sign In'}
+              </button>
+            </form>
+          </div>
+
           <p className="text-center text-sm text-muted-foreground mt-6">
             Don't have an account?{' '}
             <button

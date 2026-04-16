@@ -1,9 +1,30 @@
-import { SignUp } from '@clerk/clerk-react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 
 export default function SignUpPage() {
   const navigate = useNavigate();
+  const { register } = useAuth();
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      await register({ username, email, password });
+      navigate('/select-role');
+    } catch (err: any) {
+      setError(err.message || 'Failed to sign up');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -41,24 +62,51 @@ export default function SignUpPage() {
               smart<span className="text-primary">bus</span>
             </span>
           </div>
-          <SignUp
-            routing="path"
-            path="/sign-up"
-            signInUrl="/sign-in"
-            fallbackRedirectUrl="/select-role"
-            appearance={{
-              elements: {
-                rootBox: 'w-full',
-                card: 'bg-card border border-border shadow-none w-full',
-                headerTitle: 'text-foreground',
-                headerSubtitle: 'text-muted-foreground',
-                formFieldLabel: 'text-foreground',
-                formFieldInput: 'bg-surface border-border text-foreground',
-                formButtonPrimary: 'bg-primary hover:opacity-90',
-                footerActionLink: 'text-primary',
-              },
-            }}
-          />
+
+          <div className="bg-card border border-border shadow-none w-full p-8 rounded-xl">
+            <h2 className="text-2xl font-semibold mb-6">Create Account</h2>
+            {error && <div className="text-red-500 mb-4">{error}</div>}
+            <form onSubmit={handleRegister} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Username (e.g. Register Number)</label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                  className="w-full bg-surface border border-border rounded-md px-3 py-2 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="w-full bg-surface border border-border rounded-md px-3 py-2 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full bg-surface border border-border rounded-md px-3 py-2 text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-primary text-primary-foreground py-2 rounded-md hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {loading ? 'Creating Account...' : 'Continue'}
+              </button>
+            </form>
+          </div>
+
           <p className="text-center text-sm text-muted-foreground mt-6">
             Already have an account?{' '}
             <button

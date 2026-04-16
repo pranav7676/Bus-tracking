@@ -1,5 +1,5 @@
-import { useAuth, useUser } from '@clerk/clerk-react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { useAppStore } from '../../stores/appStore';
 import type { UserRole } from '../../types';
 
@@ -10,13 +10,12 @@ interface AuthGuardProps {
 }
 
 export function AuthGuard({ children, allowedRoles, requireOnboarding = true }: AuthGuardProps) {
-  const { isSignedIn, isLoaded } = useAuth();
-  const { user } = useUser();
+  const { isSignedIn, isLoaded, user } = useAuth();
   const location = useLocation();
   const userRole = useAppStore((state) => state.userRole);
   const onboardingDone = useAppStore((state) => state.onboardingDone);
 
-  // Wait for Clerk to fully load before making any routing decisions
+  // Wait for auth context to fully load
   if (!isLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -29,18 +28,18 @@ export function AuthGuard({ children, allowedRoles, requireOnboarding = true }: 
   }
 
   // Not signed in → send to sign-in
-  if (!isSignedIn) {
+  if (!isSignedIn || !user) {
     return <Navigate to="/sign-in" state={{ from: location }} replace />;
   }
 
   const currentPath = location.pathname;
 
-  // Signed in but no role → send to role selection (unless already there)
+  // Signed in but no role → send to role selection
   if (!userRole && currentPath !== '/select-role') {
     return <Navigate to="/select-role" replace />;
   }
 
-  // Has role but onboarding not done → send to onboarding (unless already there)
+  // Has role but onboarding not done → send to onboarding
   if (userRole && requireOnboarding && !onboardingDone && currentPath !== '/onboarding') {
     return <Navigate to="/onboarding" replace />;
   }

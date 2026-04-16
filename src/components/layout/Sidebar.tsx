@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { useClerk, useUser } from '@clerk/clerk-react';
+import { useAuth } from '../../context/AuthContext';
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -67,8 +67,7 @@ const defaultNav = [
 ];
 
 export function Sidebar() {
-    const { signOut } = useClerk();
-    const { user } = useUser();
+    const { user, logout } = useAuth();
     const navigate = useNavigate();
     const isCollapsed = useAppStore((state) => state.sidebarCollapsed);
     const toggleSidebar = useAppStore((state) => state.toggleSidebar);
@@ -88,7 +87,7 @@ export function Sidebar() {
     const handleLogout = async () => {
         setIsLoggingOut(true);
         try {
-            await signOut();
+            logout();
             navigate('/');
         } catch (error) {
             console.error('Logout failed:', error);
@@ -178,8 +177,8 @@ export function Sidebar() {
                         )}
                     >
                         <Avatar className="h-9 w-9">
-                            <AvatarImage src={user?.imageUrl} alt={user?.fullName || 'User'} />
-                            <AvatarFallback>{getInitials(user?.fullName)}</AvatarFallback>
+                            <AvatarImage src={undefined} alt={user?.username || 'User'} />
+                            <AvatarFallback>{getInitials(user?.username)}</AvatarFallback>
                         </Avatar>
                         {!isCollapsed && (
                             <motion.div
@@ -188,7 +187,7 @@ export function Sidebar() {
                                 className="flex-1 min-w-0"
                             >
                                 <p className="text-sm font-medium truncate">
-                                    {user?.fullName || 'User'}
+                                    {user?.username || 'User'}
                                 </p>
                                 <p className="text-xs text-muted-foreground truncate capitalize">
                                     {userRole?.toLowerCase() || 'Passenger'}

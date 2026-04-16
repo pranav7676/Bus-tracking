@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '../context/AuthContext';
 import { ArrowLeft, Check, Zap, Star, Shield, ChevronDown, Sparkles } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
@@ -75,7 +75,8 @@ const plans = [
 
 export function PricingPage() {
   const navigate = useNavigate();
-  const { isSignedIn } = useAuth();
+  const { user } = useAuth();
+  const isSignedIn = !!user;
   const [isYearly, setIsYearly] = useState(false);
   const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
   const { handleStartTrial } = useStartTrial();

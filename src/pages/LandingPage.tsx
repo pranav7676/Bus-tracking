@@ -1,4 +1,4 @@
-import { SignIn, SignUp, useAuth } from '@clerk/clerk-react';
+import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -9,15 +9,15 @@ import { useAppStore } from '../stores/appStore';
 import { useStartTrial } from '../lib/startTrial';
 
 export function LandingPage() {
-    const { isSignedIn, isLoaded } = useAuth();
+    const { user } = useAuth();
+    const isSignedIn = !!user;
     const navigate = useNavigate();
-    const [showAuth, setShowAuth] = useState<'signin' | 'signup' | null>(null);
     const userRole = useAppStore((state) => state.userRole);
     const onboardingDone = useAppStore((state) => state.onboardingDone);
     const { handleStartTrial } = useStartTrial();
 
-    // Only redirect after Clerk is fully loaded to avoid loops
-    if (isLoaded && isSignedIn) {
+    // Redirect if signed in
+    if (isSignedIn) {
         if (userRole && onboardingDone) {
             return <Navigate to={`/dashboard/${userRole.toLowerCase()}`} replace />;
         }
@@ -259,49 +259,6 @@ export function LandingPage() {
 
             {/* Footer */}
             <Footer />
-
-            {/* Auth Modal */}
-            {showAuth && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
-                    onClick={() => setShowAuth(null)}
-                >
-                    <motion.div
-                        initial={{ scale: 0.95, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="w-full max-w-md"
-                    >
-                        {showAuth === 'signin' ? (
-                            <SignIn
-                                appearance={{
-                                    elements: {
-                                        rootBox: 'w-full',
-                                        card: 'bg-card border border-border shadow-2xl rounded-xl',
-                                    },
-                                }}
-                                routing="hash"
-                                signUpUrl="#signup"
-                                fallbackRedirectUrl="/select-role"
-                            />
-                        ) : (
-                            <SignUp
-                                appearance={{
-                                    elements: {
-                                        rootBox: 'w-full',
-                                        card: 'bg-card border border-border shadow-2xl rounded-xl',
-                                    },
-                                }}
-                                routing="hash"
-                                signInUrl="#signin"
-                                fallbackRedirectUrl="/select-role"
-                            />
-                        )}
-                    </motion.div>
-                </motion.div>
-            )}
         </div>
     );
 }

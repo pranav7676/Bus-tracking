@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { useUser, useClerk } from '@clerk/clerk-react';
+import { useAuth } from '../context/AuthContext';
 import { ArrowLeft, Settings, Palette, Bell, Shield, Globe, Moon, Sun, Monitor, AlertTriangle, ExternalLink } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
@@ -15,8 +15,7 @@ const timezones = ['Asia/Kolkata (IST)', 'America/New_York (EST)', 'Europe/Londo
 
 export function SettingsPage() {
     const navigate = useNavigate();
-    const { user } = useUser();
-    const { openUserProfile } = useClerk();
+    const { user } = useAuth();
     const { language, setLanguage, t, languageNames, availableLanguages } = useLanguage();
     const { themeMode, setThemeMode } = useTheme();
 
@@ -88,11 +87,11 @@ export function SettingsPage() {
                                                 <div className="grid sm:grid-cols-2 gap-4">
                                                     <div>
                                                         <label className="text-sm font-medium text-muted-foreground">{t('settings.fullName')}</label>
-                                                        <p className="mt-1 font-medium">{user?.fullName || 'Not set'}</p>
+                                                        <p className="mt-1 font-medium">{user?.username || 'Not set'}</p>
                                                     </div>
                                                     <div>
                                                         <label className="text-sm font-medium text-muted-foreground">{t('settings.email')}</label>
-                                                        <p className="mt-1 font-medium">{user?.primaryEmailAddress?.emailAddress || 'Not set'}</p>
+                                                        <p className="mt-1 font-medium">{user?.email || 'Not set'}</p>
                                                     </div>
                                                     <div>
                                                         <label className="text-sm font-medium text-muted-foreground">{t('settings.userId')}</label>
@@ -103,7 +102,7 @@ export function SettingsPage() {
                                                         <p className="mt-1 text-sm">{user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-IN') : 'N/A'}</p>
                                                     </div>
                                                 </div>
-                                                <Button variant="outline" onClick={() => openUserProfile()}>
+                                                <Button variant="outline" onClick={() => navigate('/profile')}>
                                                     <ExternalLink className="h-4 w-4 mr-2" />{t('settings.manageProfile')}
                                                 </Button>
                                             </CardContent>
@@ -226,9 +225,9 @@ export function SettingsPage() {
                                                 </div>
                                                 <div className="flex items-center justify-between py-2">
                                                     <span className="text-sm text-muted-foreground">{t('settings.lastSignIn')}</span>
-                                                    <span className="text-sm">{user?.lastSignInAt ? new Date(user.lastSignInAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) : 'N/A'}</span>
+                                                    <span className="text-sm">{user?.createdAt ? new Date(user.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) : 'N/A'}</span>
                                                 </div>
-                                                <Button variant="outline" size="sm" onClick={() => openUserProfile()}>
+                                                <Button variant="outline" size="sm" onClick={() => navigate('/profile')}>
                                                     <ExternalLink className="h-4 w-4 mr-2" />{t('settings.manageSessions')}
                                                 </Button>
                                             </CardContent>
@@ -240,7 +239,7 @@ export function SettingsPage() {
                                                 <p className="text-sm text-muted-foreground mb-4">
                                                     {t('settings.twoFactorDesc')}
                                                 </p>
-                                                <Button variant="outline" onClick={() => openUserProfile()}>
+                                                <Button variant="outline" onClick={() => navigate('/profile')}>
                                                     <Shield className="h-4 w-4 mr-2" />{t('settings.configure2FA')}
                                                 </Button>
                                             </CardContent>

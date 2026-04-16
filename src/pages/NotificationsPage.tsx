@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { ArrowLeft, Bell, BellRing, Check, Clock, AlertTriangle, Info, Trash2, CheckCheck } from 'lucide-react';
-import { useUser } from '@clerk/clerk-react';
+import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Breadcrumb } from '../components/ui/Breadcrumb';
@@ -35,7 +35,7 @@ const typeConfig = {
 
 export function NotificationsPage() {
     const navigate = useNavigate();
-    const { user } = useUser();
+    const { user } = useAuth();
     const [notifications, setNotifications] = useState(initialNotifications);
     const [filter, setFilter] = useState<'all' | 'unread'>('all');
 

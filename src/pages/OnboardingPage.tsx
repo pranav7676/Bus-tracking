@@ -1,44 +1,48 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
 import { ArrowRight, User, Phone, CheckCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import { useAppStore } from '../stores/appStore';
 import { Button } from '../components/ui/Button';
+import { api } from '../lib/api';
 
 export default function OnboardingPage() {
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { user } = useAuth();
   const userRole = useAppStore((state) => state.userRole);
   const setOnboardingDone = useAppStore((state) => state.setOnboardingDone);
 
-  const [name, setName] = useState(user?.fullName || '');
+  const [registerNumber, setRegisterNumber] = useState(user?.name || '');
+  const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
+  const [department, setDepartment] = useState('');
+  const [year, setYear] = useState('1');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = useCallback(async () => {
-    if (!name.trim()) return;
+    if (!fullName.trim() || !registerNumber.trim()) return;
     setIsSubmitting(true);
     try {
-      await fetch(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/users/${user?.id}/onboarding`,
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, phone }),
-        }
-      ).catch(() => {/* API may be offline */});
+      await api.createProfile({
+        fullName,
+        registerNumber,
+        phone,
+        department,
+        year: parseInt(year, 10),
+      });
 
       setOnboardingDone(true);
       const rolePath = userRole?.toLowerCase() || 'student';
       navigate(`/dashboard/${rolePath}`);
     } catch {
+      // Assuming mock or partial flow success if errors
       setOnboardingDone(true);
       navigate(`/dashboard/${userRole?.toLowerCase() || 'student'}`);
     } finally {
       setIsSubmitting(false);
     }
-  }, [name, phone, user, userRole, setOnboardingDone, navigate]);
+  }, [fullName, registerNumber, phone,, department, year, userRole, setOnboardingDone, navigate]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-6 py-12">
@@ -63,46 +67,39 @@ export default function OnboardingPage() {
           </p>
         </div>
 
-        <div className="card p-8 space-y-6">
-          {/* Progress */}
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-success" />
-              <span className="text-sm text-muted-foreground">Account created</span>
-            </div>
-            <div className="h-px flex-1 bg-border" />
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-success" />
-              <span className="text-sm text-muted-foreground">Role selected</span>
-            </div>
-            <div className="h-px flex-1 bg-border" />
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center">
-                <div className="w-2 h-2 rounded-full bg-primary" />
-              </div>
-              <span className="text-sm text-foreground font-medium">Profile</span>
+        <div className="card p-8 space-y-4">
+          
+          <div>
+            <label className="block text-sm font-medium mb-2">Register Number</label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <input
+                type="text"
+                value={registerNumber}
+                onChange={(e) => setRegisterNumber(e.target.value)}
+                placeholder="RA2311003020XXX"
+                className="input pl-11"
+              />
             </div>
           </div>
 
-          {/* Full Name */}
           <div>
             <label className="block text-sm font-medium mb-2">Full Name</label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <input
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 placeholder="Enter your full name"
                 className="input pl-11"
               />
             </div>
           </div>
 
-          {/* Phone */}
           <div>
             <label className="block text-sm font-medium mb-2">
-              Phone Number <span className="text-muted-foreground text-xs">(optional)</span>
+              Phone Number
             </label>
             <div className="relative">
               <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -116,12 +113,37 @@ export default function OnboardingPage() {
             </div>
           </div>
 
+          <div>
+            <label className="block text-sm font-medium mb-2">Department</label>
+            <input
+              type="text"
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+              placeholder="e.g., CSE"
+              className="input w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Year</label>
+            <select
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+              className="input w-full"
+            >
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+          </div>
+
           <Button
             onClick={handleSubmit}
-            disabled={!name.trim() || isSubmitting}
+            disabled={!fullName.trim() || !registerNumber.trim() || isSubmitting}
             loading={isSubmitting}
             size="lg"
-            className="w-full gap-2"
+            className="w-full gap-2 mt-4"
           >
             Complete Setup
             <ArrowRight className="h-5 w-5" />
