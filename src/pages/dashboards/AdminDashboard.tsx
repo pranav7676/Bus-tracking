@@ -23,8 +23,9 @@ import { StatCard } from '../../components/ui/StatCard';
 import { AnalyticsChart } from '../../components/dashboard/AnalyticsChart';
 import { formatTime } from '../../lib/utils';
 import { useToast } from '../../context/ToastContext';
+import { WS_API_BASE } from '../../config/ws';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE = WS_API_BASE;
 
 export default function AdminDashboard() {
   const buses = useAppStore((state) => state.buses);
@@ -170,11 +171,25 @@ export default function AdminDashboard() {
                           size="sm"
                           variant="outline"
                           onClick={async () => {
-                            await fetch(`${API_BASE}/api/sos/${alert.id}/resolve`, {
+                            const response = await fetch(`${API_BASE}/api/sos/${alert.id}/resolve`, {
                               method: 'PATCH',
                               headers: { 'Content-Type': 'application/json' },
                               body: JSON.stringify({ resolvedBy: 'admin-dashboard' }),
-                            }).catch(() => undefined);
+                            });
+
+                            if (!response.ok) {
+                              let message = 'Resolve failed';
+                              try {
+                                const errorBody = await response.json();
+                                message = errorBody?.message || errorBody?.error || message;
+                              } catch {
+                                // Keep default message if body is not JSON
+                              }
+                              showToast(message, 'error');
+                              return;
+                            }
+
+                            showToast('SOS resolved', 'success');
                             resolveAlert(alert.id);
                           }}
                         >

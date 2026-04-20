@@ -17,9 +17,6 @@ dotenv.config({ path: path.join(__dirname, '..', '.env') });
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Connect to MongoDB
-connectDB();
-
 // Middleware
 app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5174'],
@@ -52,6 +49,19 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 SmartBus API Server running on http://localhost:${PORT}`);
+async function bootstrap() {
+  await connectDB();
+
+  app.listen(PORT, () => {
+    console.log(`🚀 SmartBus API Server running on http://localhost:${PORT}`);
+  });
+}
+
+bootstrap().catch((error: unknown) => {
+  if (error instanceof Error) {
+    console.error('❌ Server bootstrap failed:', error.message);
+  } else {
+    console.error('❌ Server bootstrap failed with unknown error');
+  }
+  process.exit(1);
 });

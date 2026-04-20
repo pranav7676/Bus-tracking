@@ -13,7 +13,6 @@ export async function connectDB() {
     } else {
       console.error('❌ Unknown error connecting to MongoDB');
     }
-    console.warn('⚠️  Server running WITHOUT database — API calls requiring DB will fail.');
-    // Don't exit — let the server run so the frontend can load
+    process.exit(1);
   }
 }

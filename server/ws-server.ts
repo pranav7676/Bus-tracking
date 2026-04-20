@@ -373,6 +373,7 @@ app.post('/api/alerts/sos', (req, res) => {
   alerts.unshift(alert);
 
   io.to('role:ADMIN').emit('sos:alert', { ...alert, timestamp: alert.createdAt });
+  io.to(`bus:${busId}`).emit('sos:alert', { ...alert, timestamp: alert.createdAt });
   io.emit('newAlert', alert);
   return res.status(201).json({ success: true, alert });
 });

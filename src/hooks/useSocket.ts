@@ -1,8 +1,9 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import { useAppStore } from '../stores/appStore';
+import { WS_SOCKET_URL } from '../config/ws';
 
-const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:3001';
+const WS_URL = WS_SOCKET_URL;
 
 let socketInstance: Socket | null = null;
 

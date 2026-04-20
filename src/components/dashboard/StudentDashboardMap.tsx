@@ -13,6 +13,7 @@ import { useAppStore } from '../../stores/appStore';
 import { useSocket } from '../../hooks/useSocket';
 import { notify } from '../NotificationProvider';
 import Bus3DMap from '../Bus3DMap';
+import { WS_API_BASE } from '../../config/ws';
 
 interface UserLocation {
   lat: number;
@@ -47,8 +48,8 @@ function calculateEtaMinutes(distanceKm: number, speedKmh: number): number {
 }
 
 export function StudentDashboardMap({
-  sosEndpoint = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/alerts/sos`,
-  attendanceEndpoint = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/attendance`,
+  sosEndpoint = `${WS_API_BASE}/api/alerts/sos`,
+  attendanceEndpoint = `${WS_API_BASE}/api/attendance`,
   userId = 'current-user',
 }: StudentDashboardMapProps) {
   const buses = useAppStore((state) => state.buses);
@@ -122,6 +123,11 @@ export function StudentDashboardMap({
   }, [bus?.eta, bus?.location?.speed, distance]);
 
   const sendSOS = async () => {
+    if (!bus?.id) {
+      setSosMessage('No active bus selected for SOS alert.');
+      return;
+    }
+
     setSendingSos(true);
     try {
       const response = await fetch(sosEndpoint, {
@@ -136,7 +142,14 @@ export function StudentDashboardMap({
       });
 
       if (!response.ok) {
-        throw new Error('Unable to send SOS alert');
+        let message = 'Unable to send SOS alert';
+        try {
+          const errorBody = await response.json();
+          message = errorBody?.message || errorBody?.error || message;
+        } catch {
+          // Keep default message if body is not JSON
+        }
+        throw new Error(message);
       }
 
       setSosMessage('SOS alert sent successfully. Authorities have been notified.');
@@ -144,8 +157,9 @@ export function StudentDashboardMap({
       window.setTimeout(() => {
         setSosMessage('No active alerts. Stay safe!');
       }, 3500);
-    } catch {
-      setSosMessage('Failed to send SOS. Please try again.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to send SOS. Please try again.';
+      setSosMessage(message);
       window.setTimeout(() => {
         setSosMessage('No active alerts. Stay safe!');
       }, 3500);
@@ -172,14 +186,22 @@ export function StudentDashboardMap({
       });
 
       if (!response.ok) {
-        throw new Error('Attendance failed');
+        let message = 'Attendance failed';
+        try {
+          const errorBody = await response.json();
+          message = errorBody?.message || errorBody?.error || message;
+        } catch {
+          // Keep default message if body is not JSON
+        }
+        throw new Error(message);
       }
 
       setSosMessage('Attendance marked successfully. Driver has been notified.');
       notify('Attendance marked successfully!', 'success');
       window.setTimeout(() => setSosMessage('No active alerts. Stay safe!'), 3500);
-    } catch {
-      setSosMessage('Failed to mark attendance. Please try again.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to mark attendance. Please try again.';
+      setSosMessage(message);
       window.setTimeout(() => setSosMessage('No active alerts. Stay safe!'), 3500);
     } finally {
       setMarkingAttendance(false);
