@@ -10,6 +10,8 @@ import authRoutes from './routes/authRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
 import busRoutes from './routes/busRoutes.js';
 import attendanceRoutes from './routes/attendanceRoutes.js';
+import paymentRoutes from './routes/payment.js';
+import reviewRoutes from './routes/reviewRoutes.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
@@ -35,6 +37,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/bus', busRoutes);
 app.use('/api/attendance', attendanceRoutes);
+app.use('/api', paymentRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

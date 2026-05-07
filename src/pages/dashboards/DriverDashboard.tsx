@@ -1,5 +1,6 @@
 import { useEffect, useCallback, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   Play,
   Square,
@@ -9,6 +10,7 @@ import {
   Navigation,
   Gauge,
   Radio,
+  Home,
 } from 'lucide-react';
 import { useAppStore } from '../../stores/appStore';
 import { useSocket } from '../../hooks/useSocket';
@@ -16,6 +18,7 @@ import { useGeolocation } from '../../hooks/useGeolocation';
 import { useToast } from '../../context/ToastContext';
 import Bus3DMap from '../../components/Bus3DMap';
 import { notify } from '../../components/NotificationProvider';
+import { ReviewsSection } from '../../components/dashboard/ReviewsSection';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -24,6 +27,7 @@ import { StatCard } from '../../components/ui/StatCard';
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export default function DriverDashboard() {
+  const navigate = useNavigate();
   const isOnTrip = useAppStore((state) => state.isOnTrip);
   const startTrip = useAppStore((state) => state.startTrip);
   const endTrip = useAppStore((state) => state.endTrip);
@@ -100,7 +104,13 @@ export default function DriverDashboard() {
   }, [endTrip, assignedBus, updateTrip]);
 
   const handleSOS = useCallback(() => {
-    if (!assignedBus) return;
+    if (!assignedBus) {
+      showToast('No bus assigned to send emergency alert', 'error');
+      return;
+    }
+    
+    showToast('Sending emergency alert to administration...', 'warning');
+    
     triggerSOS({
       userId: 'current-driver',
       busId: assignedBus.id,
@@ -108,7 +118,11 @@ export default function DriverDashboard() {
       latitude: geo.latitude || undefined,
       longitude: geo.longitude || undefined,
     });
-  }, [assignedBus, triggerSOS, geo.latitude, geo.longitude]);
+
+    setTimeout(() => {
+      showToast('Emergency alert broadcasted successfully!', 'success');
+    }, 1000);
+  }, [assignedBus, triggerSOS, geo.latitude, geo.longitude, showToast]);
 
   const container = {
     hidden: { opacity: 0 },
@@ -144,9 +158,20 @@ export default function DriverDashboard() {
             </div>
           )}
         </div>
-        <Badge variant={isOnTrip ? 'success' : 'outline'} className="text-sm px-4 py-1.5">
-          {isOnTrip ? 'On Trip' : 'Off Duty'}
-        </Badge>
+        <div className="flex flex-col items-end gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.location.href = '/'}
+            className="flex items-center gap-2 hover:bg-primary/10 transition-colors"
+          >
+            <Home className="h-4 w-4" />
+            Home
+          </Button>
+          <Badge variant={isOnTrip ? 'success' : 'outline'} className="text-sm px-4 py-1.5">
+            {isOnTrip ? 'On Trip' : 'Off Duty'}
+          </Badge>
+        </div>
       </motion.div>
 
       <motion.div variants={item} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -279,6 +304,11 @@ export default function DriverDashboard() {
               </Button>
             </CardContent>
           </Card>
+        </motion.div>
+
+        {/* Reviews Section */}
+        <motion.div variants={item}>
+          <ReviewsSection role="DRIVER" />
         </motion.div>
       </div>
     </motion.div>

@@ -1,9 +1,11 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Calendar, Clock, User, TrendingUp, Zap, BookOpen } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
+import { api } from '../lib/api';
 
 const featuredPost = {
     title: 'Introducing AI-Powered Route Optimization',
@@ -71,6 +73,25 @@ const categories = ['All', 'Product Update', 'Engineering', 'Case Study', 'Indus
 
 export function BlogPage() {
     const navigate = useNavigate();
+    const [communityReviews, setCommunityReviews] = useState<any[]>([]);
+
+    useEffect(() => {
+        const loadReviews = async () => {
+            try {
+                const reviews = await api.getReviews();
+                setCommunityReviews(reviews || []);
+            } catch (error) {
+                console.error('Failed to load community reviews:', error);
+            }
+        };
+
+        loadReviews();
+    }, []);
+
+    const getReviewForPost = (index: number) => {
+        if (communityReviews.length === 0) return null;
+        return communityReviews[index % communityReviews.length];
+    };
 
     return (
         <div className="min-h-screen bg-background">
@@ -103,6 +124,11 @@ export function BlogPage() {
                         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                             Product updates, engineering deep-dives, customer stories, and industry trends
                         </p>
+                        <div className="mt-4">
+                            <Button variant="outline" onClick={() => window.location.href = '/reviews'}>
+                                Community Reviews
+                            </Button>
+                        </div>
                     </motion.div>
 
                     {/* Category Filter */}
@@ -162,6 +188,18 @@ export function BlogPage() {
                                         Read Article
                                         <ArrowRight className="h-4 w-4" />
                                     </Button>
+                                    <div className="mt-6 rounded-xl border border-border bg-surface/70 p-4">
+                                        <p className="text-xs uppercase tracking-[0.2em] text-primary mb-2">Community Review</p>
+                                        {communityReviews.length > 0 ? (
+                                            <>
+                                                <p className="text-sm font-medium mb-1">{communityReviews[0].title}</p>
+                                                <p className="text-sm text-muted-foreground line-clamp-2">{communityReviews[0].comment}</p>
+                                                <p className="text-xs text-muted-foreground mt-2">by {communityReviews[0].userName}</p>
+                                            </>
+                                        ) : (
+                                            <p className="text-sm text-muted-foreground">No reviews yet. Be the first to share feedback.</p>
+                                        )}
+                                    </div>
                                 </CardContent>
                             </div>
                         </Card>
@@ -202,6 +240,20 @@ export function BlogPage() {
                                         <p className="text-sm text-muted-foreground mb-4 flex-1 line-clamp-2">
                                             {post.excerpt}
                                         </p>
+                                        <div className="mb-4 rounded-lg border border-border bg-background/60 p-3">
+                                            <div className="flex items-center justify-between mb-1">
+                                                <span className="text-[11px] uppercase tracking-[0.18em] text-primary">What users say</span>
+                                                <span className="text-[11px] text-muted-foreground">Live feedback</span>
+                                            </div>
+                                            {getReviewForPost(index) ? (
+                                                <>
+                                                    <p className="text-sm font-medium line-clamp-1">{getReviewForPost(index)?.title}</p>
+                                                    <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{getReviewForPost(index)?.comment}</p>
+                                                </>
+                                            ) : (
+                                                <p className="text-xs text-muted-foreground">Reviews will appear here after users submit them.</p>
+                                            )}
+                                        </div>
                                         <div className="flex items-center justify-between text-xs text-muted-foreground">
                                             <span>{post.author}</span>
                                             <span>{post.readTime}</span>

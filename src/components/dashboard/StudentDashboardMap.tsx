@@ -250,11 +250,19 @@ export function StudentDashboardMap({
           </div>
         </div>
 
-        <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          <p className="mb-1 flex items-center gap-2 font-semibold">
-            <AlertTriangle className="h-4 w-4" /> Alerts
-          </p>
-          <p>{sosMessage}</p>
+        <div className="mt-5 rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
+          <div className="flex items-center justify-between mb-1">
+            <p className="flex items-center gap-2 font-semibold">
+              <AlertTriangle className="h-4 w-4" /> Alerts
+            </p>
+            <button 
+              onClick={() => window.location.href = '/alerts'}
+              className="text-[10px] uppercase font-bold hover:underline"
+            >
+              View History
+            </button>
+          </div>
+          <p className="text-xs opacity-90">{sosMessage}</p>
         </div>
 
         <div className="mt-4 rounded-xl border border-border bg-surface p-3">

@@ -4,12 +4,18 @@ import { api, getToken, setToken, removeToken } from '../lib/api';
 interface User {
   id: string;
   name: string;
+  username?: string;
   email: string;
   role: string;
+  createdAt?: string;
   phone?: string;
   countryCode?: string;
   onboardingDone?: boolean;
   plan?: string | null;
+  subscriptionStart?: string;
+  subscriptionEnd?: string;
+  trialUsed?: boolean;
+  paymentMethods?: any[];
 }
 
 interface AuthContextType {
@@ -17,7 +23,7 @@ interface AuthContextType {
   isLoaded: boolean;
   isSignedIn: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (data: { name: string; email: string; password: string; phone?: string; countryCode?: string }) => Promise<void>;
+  register: (data: { username?: string; name?: string; email: string; password: string; phone?: string; countryCode?: string }) => Promise<void>;
   logout: () => void;
   updateUser: (data: Partial<User>) => void;
   refreshProfile: () => Promise<void>;
@@ -37,17 +43,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoaded(true);
         return;
       }
-      const profile = await api.getProfile();
-      setUser({
-        id: profile._id || profile.id,
-        name: profile.name,
-        email: profile.email,
-        role: profile.role,
-        phone: profile.phone,
-        countryCode: profile.countryCode,
-        onboardingDone: profile.onboardingDone,
-        plan: profile.plan,
-      });
+
+      const account = await api.getMe();
+      const baseUser = {
+        id: account._id || account.id,
+        name: account.username || account.name || account.email,
+        username: account.username,
+        email: account.email,
+        role: account.role || 'STUDENT',
+        plan: account.plan,
+        subscriptionStart: account.subscriptionStart,
+        subscriptionEnd: account.subscriptionEnd,
+        trialUsed: account.trialUsed,
+        paymentMethods: account.paymentMethods,
+      };
+
+      try {
+        const profile = await api.getProfile();
+        const role = (profile.role || baseUser.role) as any;
+        const onboardingDone = !!profile.onboardingDone;
+        
+        setUser({
+          ...baseUser,
+          name: profile.fullName || baseUser.name,
+          phone: profile.phone,
+          countryCode: profile.countryCode,
+          onboardingDone,
+          role,
+        });
+
+        // Sync with AppStore
+        const { setUserRole, setOnboardingDone } = useAppStore.getState();
+        setUserRole(role);
+        setOnboardingDone(onboardingDone);
+      } catch {
+        setUser(baseUser);
+        const { setUserRole } = useAppStore.getState();
+        setUserRole(baseUser.role as any);
+      }
     } catch {
       removeToken();
       setUser(null);
@@ -63,18 +96,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     const res = await api.login({ email, password });
     setToken(res.token);
-    setUser(res.user);
+    setUser({
+      id: res.user.id,
+      name: res.user.username || res.user.name || res.user.email,
+      username: res.user.username,
+      email: res.user.email,
+      role: res.user.role || 'STUDENT',
+    });
   };
 
-  const register = async (data: { name: string; email: string; password: string; phone?: string; countryCode?: string }) => {
-    const res = await api.register(data);
+  const register = async (data: { username?: string; name?: string; email: string; password: string; phone?: string; countryCode?: string }) => {
+    const res = await api.register({
+      username: data.username || data.name || data.email,
+      email: data.email,
+      password: data.password,
+    });
     setToken(res.token);
-    setUser(res.user);
+    setUser({
+      id: res.user.id,
+      name: res.user.username || res.user.name || res.user.email,
+      username: res.user.username,
+      email: res.user.email,
+      role: res.user.role || 'STUDENT',
+    });
   };
 
   const logout = () => {
     removeToken();
+    localStorage.removeItem('smartbus_user_role');
+    localStorage.removeItem('smartbus_onboarding_done');
     setUser(null);
+    window.location.href = '/';
   };
 
   const updateUser = (data: Partial<User>) => {

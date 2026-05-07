@@ -32,16 +32,34 @@ async function apiRequest(endpoint: string, options: RequestInit = {}) {
     });
 
     console.log(`📨 Response Status: ${res.status}`);
-    
-    const data = await res.json();
-    
-    if (!res.ok) {
-      console.error(`❌ API Error: ${data.message || 'Request failed'}`);
-      throw new Error(data.message || 'Request failed');
+    // Handle common status codes explicitly
+    if (res.status === 401) {
+      // Unauthenticated
+      throw new Error('Authentication required');
     }
-    
-    console.log(`✅ API Success: ${JSON.stringify(data).substring(0, 100)}...`);
-    return data;
+
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      const data = await res.json();
+      if (!res.ok) {
+        console.error(`❌ API Error: ${data?.message || 'Request failed'}`);
+        throw new Error(data?.message || `Request failed (${res.status})`);
+      }
+      console.log(`✅ API Success: ${JSON.stringify(data).substring(0, 100)}...`);
+      return data;
+    } else {
+      // Non-JSON response (could be HTML error page)
+      const text = await res.text();
+      if (!res.ok) {
+        console.error(`❌ API Error (non-json): ${text.substring(0, 200)}`);
+        // Try to extract a meaningful message
+        const match = text.match(/<title>(.*?)<\/title>/i);
+        const message = match ? match[1] : `Request failed with status ${res.status}`;
+        throw new Error(message);
+      }
+      // Return raw text for successful non-json responses
+      return text as any;
+    }
   } catch (error: any) {
     if (error instanceof TypeError) {
       console.error(`🚫 Network Error (Failed to fetch): ${error.message}`);
@@ -83,6 +101,38 @@ export const api = {
   
   markAttendance: (data: { busId: string, status?: string }) =>
     apiRequest('/attendance', { method: 'POST', body: JSON.stringify(data) }),
+
+  // Orders
+  getOrders: () => apiRequest('/orders'),
+
+  // Payment
+  post: (endpoint: string, data: any) => 
+    apiRequest(endpoint, { method: 'POST', body: JSON.stringify(data) }),
+
+  createOrder: (data: { plan: string; price: number; paymentMethod: string }) =>
+    apiRequest('/payment/cart', { method: 'POST', body: JSON.stringify(data) }),
+
+  checkout: (orderId: string, data: { paymentMethod: string; lastFour?: string }) =>
+    apiRequest(`/payment/checkout/${orderId}`, { method: 'POST', body: JSON.stringify(data) }),
+
+  generateQR: (data: any) =>
+    apiRequest('/payment/generate-qr', { method: 'POST', body: JSON.stringify(data) }),
+
+  // Reviews
+  getReviews: (role?: string) => 
+    apiRequest(role ? `/reviews?role=${role}` : '/reviews'),
+
+  getUserReviews: () =>
+    apiRequest('/reviews/user/my-reviews'),
+
+  createReview: (data: { rating: number; title: string; comment: string; role: string }) =>
+    apiRequest('/reviews', { method: 'POST', body: JSON.stringify(data) }),
+
+  updateReview: (id: string, data: { rating?: number; title?: string; comment?: string }) =>
+    apiRequest(`/reviews/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  deleteReview: (id: string) =>
+    apiRequest(`/reviews/${id}`, { method: 'DELETE' }),
 
 };
 

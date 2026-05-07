@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { GraduationCap, Truck, Shield, ArrowRight } from 'lucide-react';
 import { useAppStore } from '../stores/appStore';
@@ -39,10 +39,12 @@ const roles = [
 
 export default function RoleSelectionPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, updateUser } = useAuth();
   const setUserRole = useAppStore((state) => state.setUserRole);
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const redirectUrl = searchParams.get('redirect_url');
 
   const handleSubmit = useCallback(async () => {
     if (!selectedRole || !user) return;
@@ -51,15 +53,25 @@ export default function RoleSelectionPage() {
       await api.updateRole(selectedRole);
       updateUser({ role: selectedRole });
       setUserRole(selectedRole);
-      navigate('/onboarding');
+      // If redirect_url exists, use it; otherwise go to onboarding
+      if (redirectUrl) {
+        navigate(redirectUrl);
+      } else {
+        navigate('/onboarding');
+      }
     } catch {
       setUserRole(selectedRole);
       updateUser({ role: selectedRole });
-      navigate('/onboarding');
+      // If redirect_url exists, use it; otherwise go to onboarding
+      if (redirectUrl) {
+        navigate(redirectUrl);
+      } else {
+        navigate('/onboarding');
+      }
     } finally {
       setIsSubmitting(false);
     }
-  }, [selectedRole, user, setUserRole, updateUser, navigate]);
+  }, [selectedRole, user, setUserRole, updateUser, navigate, redirectUrl]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-6 py-12">

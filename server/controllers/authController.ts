@@ -15,7 +15,7 @@ export const register = async (req: Request, res: Response) => {
   try {
     const { username, email, password } = req.body;
 
-    if (!email || !password) {
+    if (!username || !email || !password) {
       return res.status(400).json({ message: 'All fields required' });
     }
 
@@ -35,7 +35,12 @@ export const register = async (req: Request, res: Response) => {
     res.status(201).json({
       message: 'Register successful',
       token,
-      user: { id: user._id, email: user.email }
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      }
     });
   } catch (error: any) {
     console.error('Register error:', error);
@@ -70,7 +75,12 @@ export const loginUser = async (req: Request, res: Response) => {
     res.status(200).json({
       message: 'Login successful',
       token,
-      user: { id: user._id, email: user.email }
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      }
     });
   } catch (error: any) {
     console.error('LOGIN ERROR:', error);
@@ -82,7 +92,7 @@ export const login = loginUser;
 
 export const getMe = async (req: Request, res: Response) => {
   try {
-    const user = await User.findById((req as any).userId).select('-password');
+    const user = await User.findById((req as any).userId).select('username email role createdAt updatedAt');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }

@@ -26,6 +26,8 @@ const plans = [
       'IST timezone default',
     ],
     cta: 'Start Free Trial',
+    badge: '14-day free trial • No card required',
+    trialOnly: true,
     popular: false,
   },
   {
@@ -46,7 +48,9 @@ const plans = [
       'API access',
       'Route optimization',
     ],
-    cta: 'Start Free Trial',
+    cta: 'Get Started',
+    badge: 'Upgrade from Basic anytime',
+    trialOnly: false,
     popular: true,
   },
   {
@@ -68,7 +72,9 @@ const plans = [
       'Multi-city support',
       'GSTIN billing support',
     ],
-    cta: 'Start Free Trial',
+    cta: 'Contact Sales',
+    badge: 'Custom pricing available',
+    trialOnly: false,
     popular: false,
   },
 ];
@@ -90,12 +96,32 @@ export function PricingPage() {
     return yearlySavings;
   };
 
+  const handlePlanAction = (plan: typeof plans[0]) => {
+    if (plan.trialOnly) {
+      // Free trial flow for Basic plan
+      handleStartTrial(plan.id);
+    } else if (plan.id === 'enterprise') {
+      // Contact sales
+      navigate('/contact');
+    } else {
+      // For Pro plan or other paid plans
+      // Save to localStorage for cart persistence
+      localStorage.setItem('smartbus_cart', JSON.stringify({ plan: plan.id, quantity: 1 }));
+      
+      if (!isSignedIn) {
+        navigate(`/sign-up?redirect_url=/cart?plan=${plan.id}`);
+      } else {
+        navigate(`/cart?plan=${plan.id}`);
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate('/')}>
+          <Button variant="ghost" onClick={() => isSignedIn ? navigate('/dashboard') : navigate('/')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
           </Button>
@@ -113,7 +139,7 @@ export function PricingPage() {
       {/* Breadcrumb */}
       <div className="pt-20 max-w-7xl mx-auto px-6">
         <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors">Home</button>
+          <button onClick={() => isSignedIn ? navigate('/dashboard') : navigate('/')} className="hover:text-foreground transition-colors">Home</button>
           <span>/</span>
           <span className="text-foreground">Pricing</span>
         </nav>
@@ -219,10 +245,12 @@ export function PricingPage() {
                       className="w-full"
                       variant={plan.popular ? 'default' : 'outline'}
                       size="lg"
-                      onClick={() => handleStartTrial(plan.id)}
+                      onClick={() => handlePlanAction(plan)}
                     >
                       {plan.cta}
                     </Button>
+
+                    <p className="text-center text-xs text-muted-foreground px-2">{plan.badge}</p>
 
                     {/* Expandable Pricing Details */}
                     <div className="border-t border-border pt-4">

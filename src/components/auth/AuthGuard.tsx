@@ -33,20 +33,22 @@ export function AuthGuard({ children, allowedRoles, requireOnboarding = true }: 
   }
 
   const currentPath = location.pathname;
+  // Fallback to user.role if store isn't synced
+  const effectiveRole = userRole || (user.role as UserRole);
 
   // Signed in but no role → send to role selection
-  if (!userRole && currentPath !== '/select-role') {
+  if (!effectiveRole && currentPath !== '/select-role') {
     return <Navigate to="/select-role" replace />;
   }
 
   // Has role but onboarding not done → send to onboarding
-  if (userRole && requireOnboarding && !onboardingDone && currentPath !== '/onboarding') {
+  if (effectiveRole && requireOnboarding && !onboardingDone && currentPath !== '/onboarding' && currentPath !== '/select-role') {
     return <Navigate to="/onboarding" replace />;
   }
 
   // Role-based access control
-  if (allowedRoles && userRole && !allowedRoles.includes(userRole)) {
-    return <Navigate to={`/dashboard/${userRole.toLowerCase()}`} replace />;
+  if (allowedRoles && effectiveRole && !allowedRoles.includes(effectiveRole)) {
+    return <Navigate to={`/dashboard/${effectiveRole.toLowerCase()}`} replace />;
   }
 
   return <>{children}</>;

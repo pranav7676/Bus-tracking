@@ -115,8 +115,12 @@ export function Sidebar() {
                 transition={{ duration: 0.2 }}
                 className="fixed left-0 top-0 z-40 h-screen flex flex-col bg-card border-r border-border"
             >
-                {/* Logo */}
-                <div className="flex items-center gap-3 px-4 h-16 border-b border-border">
+                {/* Logo / Home Link */}
+                <div 
+                    className="flex items-center gap-3 px-4 h-16 border-b border-border cursor-pointer hover:bg-surface transition-colors"
+                    onClick={() => window.location.href = '/'}
+                    title="Go to Home"
+                >
                     <img src="/smartbus-icon.svg" alt="SmartBus" className="w-10 h-10" />
                     {!isCollapsed && (
                         <motion.span
@@ -224,7 +228,7 @@ export function Sidebar() {
             <Dialog open={showLogoutModal} onOpenChange={setShowLogoutModal}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Confirm Logout</DialogTitle>
+                        <DialogTitle>Confirm Sign Out</DialogTitle>
                         <DialogDescription>
                             Are you sure you want to sign out? You'll need to sign in again to access
                             your account.

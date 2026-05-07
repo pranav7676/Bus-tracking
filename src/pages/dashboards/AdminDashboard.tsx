@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   Bus,
   Users,
@@ -11,11 +12,13 @@ import {
   Shield,
   CheckCircle,
   Clock,
+  Home,
 } from 'lucide-react';
 import { useAppStore } from '../../stores/appStore';
 import { useSocket } from '../../hooks/useSocket';
 import Bus3DMap from '../../components/Bus3DMap';
 import { notify } from '../../components/NotificationProvider';
+import { ReviewsSection } from '../../components/dashboard/ReviewsSection';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -28,6 +31,7 @@ import { WS_API_BASE } from '../../config/ws';
 const API_BASE = WS_API_BASE;
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const buses = useAppStore((state) => state.buses);
   const alerts = useAppStore((state) => state.alerts);
   const stats = useAppStore((state) => state.stats);
@@ -93,9 +97,20 @@ export default function AdminDashboard() {
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
           <p className="text-muted-foreground">Fleet management & monitoring</p>
         </div>
-        <Badge variant={isConnected ? 'success' : 'outline'} className="text-sm px-4 py-1.5">
-          {isConnected ? 'All Systems Online' : 'Connecting...'}
-        </Badge>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2"
+          >
+            <Home className="h-4 w-4" />
+            Home
+          </Button>
+          <Badge variant={isConnected ? 'success' : 'outline'} className="text-sm px-4 py-1.5">
+            {isConnected ? 'All Systems Online' : 'Connecting...'}
+          </Badge>
+        </div>
       </motion.div>
 
       <motion.div variants={item} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -250,6 +265,11 @@ export default function AdminDashboard() {
             <AnalyticsChart data={analytics} />
           </CardContent>
         </Card>
+      </motion.div>
+
+      {/* Reviews Section */}
+      <motion.div variants={item}>
+        <ReviewsSection role="ADMIN" />
       </motion.div>
     </motion.div>
   );

@@ -1,21 +1,26 @@
 import { useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
   Clock,
   Bus,
   MapPin,
   Navigation,
   Wifi,
+  Home,
 } from 'lucide-react';
 import { useAppStore } from '../../stores/appStore';
 import { useSocket } from '../../hooks/useSocket';
 import { StudentDashboardMap } from '../../components/dashboard';
+import { ReviewsSection } from '../../components/dashboard/ReviewsSection';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
 import { StatCard } from '../../components/ui/StatCard';
 import { formatETA, formatDistance } from '../../lib/utils';
 
 export default function StudentDashboard() {
+  const navigate = useNavigate();
   const buses = useAppStore((state) => state.buses);
   const isConnected = useAppStore((state) => state.isConnected);
   const { joinRole, subscribeBus } = useSocket();
@@ -47,11 +52,22 @@ export default function StudentDashboard() {
           <h1 className="text-2xl font-bold">Student Dashboard</h1>
           <p className="text-muted-foreground">Track your bus and stay connected</p>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface">
-          <Wifi className={`h-4 w-4 ${isConnected ? 'text-success' : 'text-muted-foreground'}`} />
-          <span className={`text-xs font-medium ${isConnected ? 'text-success' : 'text-muted-foreground'}`}>
-            {isConnected ? 'Live' : 'Offline'}
-          </span>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2"
+          >
+            <Home className="h-4 w-4" />
+            Home
+          </Button>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface">
+            <Wifi className={`h-4 w-4 ${isConnected ? 'text-success' : 'text-muted-foreground'}`} />
+            <span className={`text-xs font-medium ${isConnected ? 'text-success' : 'text-muted-foreground'}`}>
+              {isConnected ? 'Live' : 'Offline'}
+            </span>
+          </div>
         </div>
       </motion.div>
 
@@ -124,6 +140,11 @@ export default function StudentDashboard() {
             </div>
           </CardContent>
         </Card>
+      </motion.div>
+
+      {/* Reviews Section */}
+      <motion.div variants={item}>
+        <ReviewsSection role="STUDENT" />
       </motion.div>
     </motion.div>
   );

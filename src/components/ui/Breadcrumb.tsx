@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { ChevronRight, Home } from 'lucide-react';
 
 interface BreadcrumbItem {
@@ -12,10 +13,11 @@ interface BreadcrumbProps {
 
 export function Breadcrumb({ items }: BreadcrumbProps) {
     const navigate = useNavigate();
+    const { user } = useAuth();
 
     return (
         <nav className="flex items-center gap-1.5 text-sm text-muted-foreground" aria-label="Breadcrumb">
-            <button onClick={() => navigate('/')} className="hover:text-foreground transition-colors flex items-center gap-1" aria-label="Home">
+            <button onClick={() => navigate(user ? '/dashboard' : '/')} className="hover:text-foreground transition-colors flex items-center gap-1" aria-label="Home">
                 <Home className="h-3.5 w-3.5" />
                 <span>Home</span>
             </button>

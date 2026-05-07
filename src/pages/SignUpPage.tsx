@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 
 export default function SignUpPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { register } = useAuth();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -12,13 +13,16 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const redirectUrl = searchParams.get('redirect_url');
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     try {
       await register({ username, email, password });
-      navigate('/select-role');
+      const roleRedirectUrl = redirectUrl ? `?redirect_url=${encodeURIComponent(redirectUrl)}` : '';
+      navigate(`/select-role${roleRedirectUrl}`);
     } catch (err: any) {
       setError(err.message || 'Failed to sign up');
     } finally {

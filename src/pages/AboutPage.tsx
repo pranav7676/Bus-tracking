@@ -7,23 +7,46 @@ import { Card, CardContent } from '../components/ui/Card';
 const team = [
     {
         name: 'M Pranav',
-        role: 'CEO & Founder',
-        initials: 'MP',
+        role: 'Co-Founder & CEO',
+        image: '/MPranav.jpeg.jpeg',
+        resume: '/M PRANAV_resume.pdf.pdf',
         bio: 'Visionary leader driving SmartBus innovation in fleet management technology.',
     },
     {
         name: 'Charumathi Sri P',
-        role: 'CTO',
-        initials: 'CS',
+        role: 'Co-Founder & CTO',
+        image: '/Charu.jpeg.jpeg',
+        resume: '/CHARu_resume.pdf',
         bio: 'Technical architect behind SmartBus real-time tracking and analytics platform.',
     },
     {
         name: 'Kaaviya B',
-        role: 'Head of Product',
-        initials: 'KB',
+        role: 'Co-Founder & Product Lead',
+        image: '/Kaaviya.jpeg.jpeg',
+        resume: '/B%20KAAVIYA_resume.pdf',
         bio: 'Product strategist shaping seamless user experiences for fleet operators.',
     },
 ];
+
+const teamContainer = {
+    hidden: {},
+    show: {
+        transition: {
+            staggerChildren: 0.09,
+            delayChildren: 0.08,
+        },
+    },
+};
+
+const teamItem = {
+    hidden: { opacity: 0, y: 18, scale: 0.96 },
+    show: {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: { duration: 0.45, ease: 'easeOut' as const },
+    },
+};
 
 const values = [
     {
@@ -62,7 +85,6 @@ export function AboutPage() {
 
     return (
         <div className="min-h-screen bg-background">
-            {/* Header */}
             <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
                     <Button variant="ghost" onClick={() => navigate('/')}>
@@ -74,8 +96,7 @@ export function AboutPage() {
             </header>
 
             <main className="pt-24 pb-16">
-                <div className="max-w-6xl mx-auto px-6">
-                    {/* Hero */}
+                <div className="max-w-6xl mx-auto px-4 sm:px-6">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -85,7 +106,7 @@ export function AboutPage() {
                             <Target className="h-4 w-4" />
                             Our Mission
                         </div>
-                        <h1 className="text-4xl lg:text-5xl font-bold mb-6">
+                        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
                             Transforming Fleet Management for the{' '}
                             <span className="gradient-text">Modern World</span>
                         </h1>
@@ -96,12 +117,11 @@ export function AboutPage() {
                         </p>
                     </motion.div>
 
-                    {/* Stats */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20"
+                        className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-20"
                     >
                         {[
                             { value: '500+', label: 'Organizations' },
@@ -116,15 +136,14 @@ export function AboutPage() {
                         ))}
                     </motion.div>
 
-                    {/* Our Story */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.15 }}
                         className="mb-20"
                     >
-                        <Card className="p-8 lg:p-12">
-                            <div className="grid lg:grid-cols-2 gap-12 items-center">
+                        <Card className="p-6 sm:p-8 lg:p-12">
+                            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
                                 <div>
                                     <h2 className="text-2xl font-bold mb-4">Our Story</h2>
                                     <div className="space-y-4 text-muted-foreground">
@@ -160,14 +179,13 @@ export function AboutPage() {
                         </Card>
                     </motion.div>
 
-                    {/* Timeline */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
                         className="mb-20"
                     >
-                        <h2 className="text-2xl font-bold text-center mb-12">Our Journey</h2>
+                        <h2 className="text-2xl font-bold text-center mb-10 sm:mb-12">Our Journey</h2>
                         <div className="relative">
                             <div className="absolute left-1/2 top-0 bottom-0 w-px bg-border hidden md:block" />
                             <div className="space-y-8">
@@ -196,7 +214,6 @@ export function AboutPage() {
                         </div>
                     </motion.div>
 
-                    {/* Values */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -204,10 +221,10 @@ export function AboutPage() {
                         className="mb-20"
                     >
                         <h2 className="text-2xl font-bold text-center mb-4">Our Values</h2>
-                        <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
+                        <p className="text-muted-foreground text-center mb-10 sm:mb-12 max-w-2xl mx-auto px-2">
                             These principles guide everything we do, from product development to customer support.
                         </p>
-                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                             {values.map((value, index) => (
                                 <motion.div
                                     key={value.title}
@@ -227,43 +244,78 @@ export function AboutPage() {
                         </div>
                     </motion.div>
 
-                    {/* Team */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
                         className="mb-20"
                     >
-                        <h2 className="text-2xl font-bold text-center mb-4">Leadership Team</h2>
-                        <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-                            Meet the people driving SmartBus forward
+                        <h2 className="text-2xl font-bold text-center mb-4">Founding Team</h2>
+                        <p className="text-muted-foreground text-center mb-10 sm:mb-12 max-w-2xl mx-auto px-2">
+                            Meet the three founders shaping SmartBus from the ground up
                         </p>
-                        <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                        <motion.div
+                            variants={teamContainer}
+                            initial="hidden"
+                            animate="show"
+                            className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 max-w-4xl mx-auto"
+                        >
                             {team.map((member, index) => (
                                 <motion.div
                                     key={member.name}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.35 + index * 0.1 }}
+                                    variants={teamItem}
+                                    whileHover={{ y: -6, transition: { duration: 0.2 } }}
                                 >
-                                    <Card className="h-full overflow-hidden hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 group">
-                                        <div className="pt-8 pb-4 flex justify-center">
-                                            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-orange-500/20 flex items-center justify-center border-2 border-primary/30 group-hover:border-primary/60 transition-colors">
-                                                <span className="text-2xl font-bold text-primary">{member.initials}</span>
-                                            </div>
+                                    <Card className="relative h-full overflow-hidden border-border/70 bg-card/90 backdrop-blur-sm hover:border-primary/30 hover:shadow-[0_20px_50px_-20px_rgba(249,115,22,0.35)] transition-all duration-300 group">
+                                        <motion.div
+                                            className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-orange-400 to-primary origin-left"
+                                            initial={{ scaleX: 0.35, opacity: 0.6 }}
+                                            animate={{ scaleX: 1, opacity: 1 }}
+                                            transition={{ duration: 0.9, ease: 'easeOut', delay: 0.1 * index }}
+                                        />
+                                        <div className="pt-7 pb-4 flex justify-center">
+                                            <motion.div
+                                                whileHover={{ scale: 1.05, rotate: -1 }}
+                                                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                                                className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-primary/30 group-hover:border-primary/60 transition-colors bg-white"
+                                            >
+                                                <img
+                                                    src={member.image}
+                                                    alt={member.name}
+                                                    className="relative z-10 w-full h-full object-contain object-top bg-white"
+                                                />
+                                                <motion.div
+                                                    className="absolute right-1 bottom-1 z-20 rounded-full bg-background/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary border border-primary/20 shadow-sm"
+                                                    animate={{ y: [0, -2, 0] }}
+                                                    transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+                                                >
+                                                    Founder
+                                                </motion.div>
+                                            </motion.div>
                                         </div>
-                                        <CardContent className="p-6 text-center">
+                                        <CardContent className="px-5 pb-6 pt-0 text-center">
                                             <h3 className="text-lg font-semibold mb-1">{member.name}</h3>
                                             <p className="text-sm text-primary font-medium mb-3">{member.role}</p>
-                                            <p className="text-sm text-muted-foreground leading-relaxed">{member.bio}</p>
+                                            <p className="text-sm text-muted-foreground leading-relaxed min-h-[3rem] px-1">{member.bio}</p>
+                                            {member.resume && (
+                                                <div className="mt-5">
+                                                    <a
+                                                        href={member.resume}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="inline-flex items-center justify-center px-4 py-2 rounded-full bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+                                                    >
+                                                        View Resume
+                                                    </a>
+                                                </div>
+                                            )}
                                         </CardContent>
                                     </Card>
                                 </motion.div>
                             ))}
-                        </div>
+                        </motion.div>
                     </motion.div>
 
-                    {/* CTA */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}

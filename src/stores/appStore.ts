@@ -62,6 +62,22 @@ function hydrateTheme(): 'light' | 'dark' {
     return 'dark';
 }
 
+function hydrateUserRole(): UserRole | null {
+    try {
+        const saved = localStorage.getItem('smartbus_user_role');
+        if (saved) return saved as UserRole;
+    } catch { /* ignore */ }
+    return null;
+}
+
+function hydrateOnboardingDone(): boolean {
+    try {
+        const saved = localStorage.getItem('smartbus_onboarding_done');
+        return saved === 'true';
+    } catch { /* ignore */ }
+    return false;
+}
+
 // Mock data for demonstration
 const mockBuses: BusWithLocation[] = chennaiBusSeeds.map((bus, index) => ({
     id: bus.id,
@@ -182,10 +198,16 @@ export const useAppStore = create<AppState>((set, get) => ({
     toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
 
     // User
-    userRole: null,
-    setUserRole: (role) => set({ userRole: role }),
-    onboardingDone: false,
-    setOnboardingDone: (done) => set({ onboardingDone: done }),
+    userRole: hydrateUserRole(),
+    setUserRole: (role) => set(() => {
+        localStorage.setItem('smartbus_user_role', role);
+        return { userRole: role };
+    }),
+    onboardingDone: hydrateOnboardingDone(),
+    setOnboardingDone: (done) => set(() => {
+        localStorage.setItem('smartbus_onboarding_done', String(done));
+        return { onboardingDone: done };
+    }),
 
     // Buses
     buses: mockBuses,

@@ -1,4 +1,4 @@
-import { Moon, Sun, Bell, Wifi, WifiOff, LogOut, User, ChevronDown, Settings, CreditCard, LayoutDashboard, HelpCircle, BellRing } from 'lucide-react';
+import { Moon, Sun, Bell, Wifi, WifiOff, LogOut, User, ChevronDown, Settings, CreditCard, LayoutDashboard, HelpCircle, BellRing, ShoppingCart, Home } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
@@ -145,18 +145,46 @@ export function Navbar({ title = 'Dashboard' }: NavbarProps) {
                             )}
                         </div>
 
+                        {/* Home Button */}
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => window.location.href = '/'} 
+                            aria-label="Home"
+                            className="text-muted-foreground hover:text-primary transition-colors"
+                        >
+                            <Home className="h-5 w-5" />
+                        </Button>
+
+                        {/* Cart Button */}
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="relative text-muted-foreground hover:text-primary transition-colors" 
+                            onClick={() => navigate('/cart')} 
+                            aria-label="Cart"
+                        >
+                            <ShoppingCart className="h-5 w-5" />
+                        </Button>
+
                         {/* Notifications */}
-                        <Button variant="ghost" size="icon" className="relative" onClick={() => navigate('/notifications')} aria-label="Notifications">
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="relative text-muted-foreground hover:text-primary transition-colors" 
+                            onClick={() => navigate('/notifications')} 
+                            aria-label="Notifications"
+                        >
                             <Bell className="h-5 w-5" />
                             {unresolvedAlerts > 0 && (
-                                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-medium">
+                                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-destructive text-destructive-foreground text-xs flex items-center justify-center font-medium border-2 border-card">
                                     {unresolvedAlerts}
                                 </span>
                             )}
                         </Button>
 
                         {/* Theme Toggle */}
-                        <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
+                        <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme" className="text-muted-foreground hover:text-primary transition-colors">
                             {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
                         </Button>
 
@@ -168,19 +196,12 @@ export function Navbar({ title = 'Dashboard' }: NavbarProps) {
                                 aria-expanded={showUserMenu}
                                 aria-haspopup="true"
                                 aria-label="User menu"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'ArrowDown' && !showUserMenu) {
-                                        e.preventDefault();
-                                        setShowUserMenu(true);
-                                        setFocusedIndex(0);
-                                    }
-                                }}
                             >
-                                <Avatar className="h-8 w-8">
+                                <Avatar className="h-8 w-8 border border-border">
                                     <AvatarImage src={undefined} alt={user?.username || 'User'} />
-                                    <AvatarFallback className="text-xs">{getInitials(user?.username)}</AvatarFallback>
+                                    <AvatarFallback className="text-xs bg-primary/10 text-primary">{getInitials(user?.username)}</AvatarFallback>
                                 </Avatar>
-                                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+                                <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`} />
                             </button>
 
                             {/* Enhanced Animated Dropdown */}
@@ -195,9 +216,13 @@ export function Navbar({ title = 'Dashboard' }: NavbarProps) {
                                     >
                                         {/* User Info Header */}
                                         <div className="px-4 py-3 border-b border-border bg-surface/50">
-                                            <p className="font-medium text-sm">{user?.username || 'User'}</p>
-                                            <p className="text-xs text-muted-foreground mt-0.5">{user?.email}</p>
-                                            <p className="text-xs text-primary mt-1 capitalize">{userRole?.toLowerCase() || 'Passenger'}</p>
+                                            <p className="font-medium text-sm truncate">{user?.username || 'User'}</p>
+                                            <p className="text-xs text-muted-foreground mt-0.5 truncate">{user?.email}</p>
+                                            <div className="flex items-center gap-2 mt-2">
+                                                <Badge variant="outline" className="text-[10px] uppercase tracking-wider py-0 px-1.5 h-4">
+                                                    {userRole || 'Passenger'}
+                                                </Badge>
+                                            </div>
                                         </div>
 
                                         {/* Menu Items */}
@@ -215,7 +240,6 @@ export function Navbar({ title = 'Dashboard' }: NavbarProps) {
                                                     }}
                                                     className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-surface transition-colors min-h-[44px] ${focusedIndex === index ? 'bg-surface ring-1 ring-primary/30' : ''}`}
                                                     role="menuitem"
-                                                    tabIndex={focusedIndex === index ? 0 : -1}
                                                 >
                                                     <item.icon className="h-4 w-4 text-muted-foreground" />
                                                     {item.label}
@@ -233,7 +257,6 @@ export function Navbar({ title = 'Dashboard' }: NavbarProps) {
                                                 }}
                                                 className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm text-destructive hover:bg-destructive/10 transition-colors min-h-[44px] ${focusedIndex === menuItems.length ? 'bg-destructive/10 ring-1 ring-destructive/30' : ''}`}
                                                 role="menuitem"
-                                                tabIndex={focusedIndex === menuItems.length ? 0 : -1}
                                             >
                                                 <LogOut className="h-4 w-4" />
                                                 Sign Out

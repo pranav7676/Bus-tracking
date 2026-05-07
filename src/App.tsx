@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useAppStore } from './stores/appStore';
 import { AppLayout, ErrorBoundary } from './components/layout';
 import { AuthGuard } from './components/auth';
+import ReviewsPage from './pages/ReviewsPage';
 import { CustomCursor } from './components/ui/CustomCursor';
 import { ScrollProgress } from './components/ui/ScrollProgress';
 import { BackToTop } from './components/ui/BackToTop';
@@ -93,6 +94,7 @@ function App() {
             <Route path="/help-center" element={<HelpCenterPage />} />
             <Route path="/help" element={<HelpCenterPage />} />
             <Route path="/blog" element={<BlogPage />} />
+            <Route path="/reviews" element={<ReviewsPage />} />
             <Route path="/security" element={<SecurityPage />} />
             <Route path="/start-trial" element={<StartTrialPage />} />
             <Route path="/features" element={<FeaturesPage />} />

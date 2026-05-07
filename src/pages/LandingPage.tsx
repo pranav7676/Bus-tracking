@@ -2,7 +2,7 @@ import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Bus, MapPin, Shield, Clock, Users, Zap } from 'lucide-react';
+import { Bus, MapPin, Shield, Clock, Users, Zap, ShoppingCart, CheckCircle } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Footer } from '../components/layout/Footer';
 import { useAppStore } from '../stores/appStore';
@@ -14,18 +14,11 @@ export function LandingPage() {
     const navigate = useNavigate();
     const userRole = useAppStore((state) => state.userRole);
     const onboardingDone = useAppStore((state) => state.onboardingDone);
+    const cart = useAppStore((state) => state.cart);
     const { handleStartTrial } = useStartTrial();
 
-    // Redirect if signed in
-    if (isSignedIn) {
-        if (userRole && onboardingDone) {
-            return <Navigate to={`/dashboard/${userRole.toLowerCase()}`} replace />;
-        }
-        if (userRole && !onboardingDone) {
-            return <Navigate to="/onboarding" replace />;
-        }
-        return <Navigate to="/select-role" replace />;
-    }
+    // Redirect logic removed to allow signed-in users to view the landing page (Home)
+    // as requested by the user.
 
     const features = [
         {
@@ -55,7 +48,7 @@ export function LandingPage() {
             {/* Header */}
             <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border">
                 <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.location.href = '/'}>
                         <img src="/smartbus-icon.svg" alt="SmartBus" className="w-10 h-10" />
                         <span className="font-bold text-xl">
                             smart<span className="text-primary">bus</span>
@@ -68,10 +61,31 @@ export function LandingPage() {
                         <button onClick={() => navigate('/contact')} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Contact</button>
                     </nav>
                     <div className="flex items-center gap-3">
-                        <Button variant="ghost" onClick={() => navigate('/sign-in')}>
-                            Sign In
-                        </Button>
-                        <Button onClick={() => navigate('/sign-up')}>Get Started</Button>
+                        {cart.length > 0 && (
+                            <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="relative text-primary hover:bg-primary/10"
+                                onClick={() => navigate('/cart')}
+                            >
+                                <ShoppingCart className="h-5 w-5" />
+                                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-white text-[10px] flex items-center justify-center font-bold">
+                                    {cart.length}
+                                </span>
+                            </Button>
+                        )}
+                        {isSignedIn ? (
+                            <Button onClick={() => navigate(userRole ? `/dashboard/${userRole.toLowerCase()}` : '/select-role')}>
+                                Go to Dashboard
+                            </Button>
+                        ) : (
+                            <>
+                                <Button variant="ghost" onClick={() => navigate('/sign-in')}>
+                                    Sign In
+                                </Button>
+                                <Button onClick={() => navigate('/sign-up')}>Get Started</Button>
+                            </>
+                        )}
                     </div>
                 </div>
             </header>
@@ -256,6 +270,23 @@ export function LandingPage() {
                     </div>
                 </section>
             </main>
+
+            {/* Floating Cart Button for Mobile/Scroll */}
+            {cart.length > 0 && (
+                <motion.button
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => navigate('/cart')}
+                    className="fixed bottom-8 right-8 z-50 w-14 h-14 rounded-full bg-primary text-white shadow-lg shadow-primary/20 flex items-center justify-center hover:bg-primary-hover transition-colors"
+                >
+                    <ShoppingCart className="h-6 w-6" />
+                    <span className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-white text-primary text-xs flex items-center justify-center font-bold border-2 border-primary">
+                        {cart.length}
+                    </span>
+                </motion.button>
+            )}
 
             {/* Footer */}
             <Footer />
